@@ -15,25 +15,20 @@
         .active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         h1 { font-size: 1.8rem; color: var(--accent); margin-bottom: 20px; }
-        .modeButton { width: 90%; max-width: 300px; height: 65px; margin: 8px; border: none; border-radius: 15px; font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+        .modeButton { width: 90%; max-width: 300px; height: 60px; margin: 8px; border: none; border-radius: 15px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
         .modeButton:active { transform: translateY(2px); box-shadow: none; }
         .basicBtn { background: var(--blue); }
         .advancedBtn { background: var(--purple); }
         .allBtn { background: var(--correct); }
-        #selectedModeText { font-size: 1.1rem; margin: 15px 0; color: #94a3b8; min-height: 1.5rem; }
+        #selectedModeText { font-size: 1.1rem; margin: 15px 0; color: #94a3b8; }
         #countdown { font-size: 5rem; height: 6rem; color: var(--correct); font-weight: bold; }
-        #equationContainer { background: var(--card); border-radius: 20px; padding: 30px 15px; margin: 10px auto 25px; width: 95%; max-width: 600px; min-height: 140px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
-        #equation { font-size: 1.4rem; line-height: 1.4; margin-bottom: 15px; word-break: break-all; font-weight: bold; }
-        #labels { font-size: 0.9rem; color: #93c5fd; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .label-item { border-top: 1px solid #475569; padding-top: 4px; }
-        #btnContainer { display: flex; justify-content: space-around; width: 100%; max-width: 500px; margin: 0 auto; }
-        .answerBtn { width: 120px; height: 120px; border: none; border-radius: 50%; font-size: 3.5rem; font-weight: bold; cursor: pointer; transition: 0.1s; box-shadow: 0 6px 0 rgba(0,0,0,0.2); }
+        #equationContainer { background: var(--card); border-radius: 20px; padding: 30px 15px; margin: 10px auto 25px; width: 95%; max-width: 600px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
+        #equation { font-size: 1.4rem; font-weight: bold; margin-bottom: 15px; word-break: break-all; }
+        .answerBtn { width: 120px; height: 120px; border: none; border-radius: 50%; font-size: 3.5rem; font-weight: bold; cursor: pointer; transition: 0.1s; box-shadow: 0 6px 0 rgba(0,0,0,0.2); margin: 10px; }
         .answerBtn:active { transform: translateY(4px); box-shadow: none; }
         #correctBtn { background: var(--correct); }
         #wrongBtn { background: var(--wrong); }
-        #resultArea { margin-top: 20px; }
-        .fail { color: var(--wrong); font-size: 2rem; font-weight: bold; }
-        .correctAnswer { color: var(--accent); font-size: 1.1rem; font-weight: bold; }
+        .rankingBox { background: var(--card); padding: 15px; border-radius: 15px; width: 85%; max-width: 300px; margin: 20px auto; text-align: left; font-size: 0.9rem; color: #cbd5e1; }
         .smallBtn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; background: #64748b; color: white; margin-top: 15px; }
     </style>
 </head>
@@ -47,6 +42,7 @@
     <div id="selectedModeText">モードを選択してください</div>
     <div id="countdown"></div>
     <button id="startGameBtn" class="modeButton allBtn" style="display:none;" onclick="countdownStart()">START</button>
+    <div class="rankingBox"><strong>🏆 BEST TIME (TOP3)</strong><div id="rankingList">記録なし</div></div>
 </div>
 
 <div id="gameScreen" class="screen">
@@ -54,7 +50,6 @@
     <div id="progress" style="font-size:1.8rem; color:var(--accent); margin: 5px 0;">0 / 10</div>
     <div id="equationContainer">
         <div id="equation">---</div>
-        <div id="labels"></div>
     </div>
     <div id="btnContainer">
         <button id="wrongBtn" class="answerBtn" onclick="judge(false)">×</button>
@@ -64,54 +59,55 @@
 </div>
 
 <script>
-// 全問題データ
+    // 全問題データ（化学基礎）
 const basicQuestions = [
-  { type:"中和", eq:"HCl + NaOH → NaCl + H₂O", correct:true },
-    { type:"中和", eq:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O", correct:true },
-    { type:"中和", eq:"H₂SO₄ + NaOH → Na₂SO₄ + H₂O", correct:false },
-    { type:"酸化還元", eq:"2Mg + O₂ → 2MgO", correct:true },
-    { type:"酸化還元", eq:"Mg + O₂ → MgO", correct:false },
-    { type:"熱分解", eq:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂", correct:true },
-    { type:"燃焼", eq:"CH₄ + 2O₂ → CO₂ + 2H₂O", correct:true },
-    { type:"酸化還元", eq:"MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O", correct:true },
-    { type:"中和", eq:"CH₃COOH + NaOH → CH₃COONa + H₂O", correct:true },
-    { type:"沈殿", eq:"Ag⁺ + Cl⁻ → AgCl", correct:true },
-    { type:"中和", eq:"HCl + Ca(OH)₂ → CaCl₂ + 2H₂O", correct:true },
-    { type:"酸化還元", eq:"2H₂ + O₂ → 2H₂O", correct:true },
-    { type:"熱分解", eq:"CaCO₃ → CaO + CO₂", correct:true },
-    { type:"酸化還元", eq:"Fe + S → FeS", correct:true },
-    { type:"酸化還元", eq:"2H₂O₂ → 2H₂O + O₂", correct:true },
-    { type:"中和", eq:"2HCl + Ca(OH)₂ → CaCl₂ + 2H₂O", correct:true },
-    { type:"沈殿", eq:"Ba²⁺ + SO₄²⁻ → BaSO₄", correct:true },
-    { type:"酸化還元", eq:"Cu + 2Ag⁺ → Cu²⁺ + 2Ag", correct:true },
-    { type:"中和", eq:"HNO₃ + KOH → KNO₃ + H₂O", correct:true },
-    { type:"燃焼", eq:"2CO + O₂ → 2CO₂", correct:true }
+    { type: "中和", eq: "HCl + NaOH → NaCl + H₂O", correct: true },
+    { type: "中和", eq: "H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O", correct: true },
+    { type: "中和", eq: "H₂SO₄ + NaOH → Na₂SO₄ + H₂O", correct: false },
+    { type: "酸化還元", eq: "2Mg + O₂ → 2MgO", correct: true },
+    { type: "酸化還元", eq: "Mg + O₂ → MgO", correct: false },
+    { type: "熱分解", eq: "2NaHCO₃ → Na₂CO₃ + H₂O + CO₂", correct: true },
+    { type: "燃焼", eq: "CH₄ + 2O₂ → CO₂ + 2H₂O", correct: true },
+    { type: "酸化還元", eq: "MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O", correct: true },
+    { type: "中和", eq: "CH₃COOH + NaOH → CH₃COONa + H₂O", correct: true },
+    { type: "沈殿", eq: "Ag⁺ + Cl⁻ → AgCl", correct: true },
+    { type: "中和", eq: "HCl + Ca(OH)₂ → CaCl₂ + 2H₂O", correct: true },
+    { type: "酸化還元", eq: "2H₂ + O₂ → 2H₂O", correct: true },
+    { type: "熱分解", eq: "CaCO₃ → CaO + CO₂", correct: true },
+    { type: "酸化還元", eq: "Fe + S → FeS", correct: true },
+    { type: "酸化還元", eq: "2H₂O₂ → 2H₂O + O₂", correct: true },
+    { type: "中和", eq: "2HCl + Ca(OH)₂ → CaCl₂ + 2H₂O", correct: true },
+    { type: "沈殿", eq: "Ba²⁺ + SO₄²⁻ → BaSO₄", correct: true },
+    { type: "酸化還元", eq: "Cu + 2Ag⁺ → Cu²⁺ + 2Ag", correct: true },
+    { type: "中和", eq: "HNO₃ + KOH → KNO₃ + H₂O", correct: true },
+    { type: "燃焼", eq: "2CO + O₂ → 2CO₂", correct: true }
 ];
 
+// 全問題データ（化学）
 const advancedQuestions = [
-   { type:"置換", eq:"C₆H₆ + HNO₃ → C₆H₅NO₂ + H₂O", correct:true },
-    { type:"置換", eq:"C₆H₆ + H₂SO₄ → C₆H₅SO₃H + H₂O", correct:true },
-    { type:"付加", eq:"C₆H₆ + 3H₂ → C₆H₁₂", correct:true },
-    { type:"置換", eq:"C₆H₆ + Cl₂ → C₆H₅Cl + HCl", correct:true },
-    { type:"クメン法", eq:"C₆H₅CH(CH₃)₂ + O₂ → C₆H₅OH + CH₃COCH₃", correct:true },
-    { type:"中和", eq:"C₆H₅OH + NaOH → C₆H₅ONa + H₂O", correct:true },
-    { type:"銀鏡反応", eq:"R-CHO + 2[Ag(NH₃)₂]⁺ + 2OH⁻ → R-COOH + 2Ag + 4NH₃ + H₂O", correct:true },
-    { type:"酸化", eq:"4NH₃ + 5O₂ → 4NO + 6H₂O", correct:true },
-    { type:"エステル化", eq:"CH₃COOH + C₂H₅OH → CH₃COOC₂H₅ + H₂O", correct:true },
-    { type:"付加", eq:"CH₂=CH₂ + H₂ → CH₃CH₃", correct:true },
-    { type:"付加", eq:"CH₂=CH₂ + Br₂ → CH₂BrCH₂Br", correct:true },
-    { type:"置換", eq:"CH₄ + Cl₂ → CH₃Cl + HCl", correct:true },
-    { type:"加水分解", eq:"CH₃COOC₂H₅ + H₂O → CH₃COOH + C₂H₅OH", correct:true },
-    { type:"中和", eq:"R-COOH + NaOH → R-COONa + H₂O", correct:true },
-    { type:"酸化", eq:"CH₃CH₂OH → CH₃CHO → CH₃COOH", correct:true },
-    { type:"還元", eq:"CH₃CHO + H₂ → CH₃CH₂OH", correct:true },
-    { type:"脱水", eq:"2C₂H₅OH → C₂H₅OC₂H₅ + H₂O", correct:true },
-    { type:"付加", eq:"CH≡CH + 2H₂ → CH₃CH₃", correct:true },
-    { type:"置換", eq:"C₆H₅OH + 3HNO₃ → C₆H₂(NO₂)₃OH + 3H₂O", correct:true },
-    { type:"合成", eq:"n(CH₂=CH₂) → -(CH₂-CH₂)-n", correct:true }
+    { type: "置換", eq: "C₆H₆ + HNO₃ → C₆H₅NO₂ + H₂O", correct: true },
+    { type: "置換", eq: "C₆H₆ + H₂SO₄ → C₆H₅SO₃H + H₂O", correct: true },
+    { type: "付加", eq: "C₆H₆ + 3H₂ → C₆H₁₂", correct: true },
+    { type: "置換", eq: "C₆H₆ + Cl₂ → C₆H₅Cl + HCl", correct: true },
+    { type: "クメン法", eq: "C₆H₅CH(CH₃)₂ + O₂ → C₆H₅OH + CH₃COCH₃", correct: true },
+    { type: "中和", eq: "C₆H₅OH + NaOH → C₆H₅ONa + H₂O", correct: true },
+    { type: "銀鏡反応", eq: "R-CHO + 2[Ag(NH₃)₂]⁺ + 2OH⁻ → R-COOH + 2Ag + 4NH₃ + H₂O", correct: true },
+    { type: "酸化", eq: "4NH₃ + 5O₂ → 4NO + 6H₂O", correct: true },
+    { type: "エステル化", eq: "CH₃COOH + C₂H₅OH → CH₃COOC₂H₅ + H₂O", correct: true },
+    { type: "付加", eq: "CH₂=CH₂ + H₂ → CH₃CH₃", correct: true },
+    { type: "付加", eq: "CH₂=CH₂ + Br₂ → CH₂BrCH₂Br", correct: true },
+    { type: "置換", eq: "CH₄ + Cl₂ → CH₃Cl + HCl", correct: true },
+    { type: "加水分解", eq: "CH₃COOC₂H₅ + H₂O → CH₃COOH + C₂H₅OH", correct: true },
+    { type: "中和", eq: "R-COOH + NaOH → R-COONa + H₂O", correct: true },
+    { type: "酸化", eq: "CH₃CH₂OH → CH₃CHO → CH₃COOH", correct: true },
+    { type: "還元", eq: "CH₃CHO + H₂ → CH₃CH₂OH", correct: true },
+    { type: "脱水", eq: "2C₂H₅OH → C₂H₅OC₂H₅ + H₂O", correct: true },
+    { type: "付加", eq: "CH≡CH + 2H₂ → CH₃CH₃", correct: true },
+    { type: "置換", eq: "C₆H₅OH + 3HNO₃ → C₆H₂(NO₂)₃OH + 3H₂O", correct: true },
+    { type: "合成", eq: "n(CH₂=CH₂) → -(CH₂-CH₂)-n", correct: true }
 ];
 
-let mode = "", currentPool = [], score = 0, gameActive = false;
+let mode = "", currentPool = [], score = 0, startTime = 0, gameActive = false;
 
 function selectMode(m) {
     mode = m;
@@ -124,51 +120,56 @@ function countdownStart() {
     const cd = document.getElementById("countdown");
     const t = setInterval(() => {
         cd.innerText = count > 0 ? count : count === 0 ? "GO!" : "";
-        if(count < -1) { clearInterval(t); start(); }
+        if(count < -1) { clearInterval(t); cd.innerText = ""; start(); }
         count--;
     }, 700);
 }
 
 function start() {
     score = 0; gameActive = true;
-    // どちらのモードでも全データを参照できるようにコピー
-    let source = mode === 'basic' ? [...basicQuestions] : 
-                 mode === 'advanced' ? [...advancedQuestions] : 
-                 [...basicQuestions, ...advancedQuestions];
-    
-    currentPool = [];
-    // 10問抽出ロジック（同じ問題が連続しないように配慮）
-    for(let i = 0; i < 10; i++) {
-        if(source.length === 0) source = mode === 'basic' ? [...basicQuestions] : mode === 'advanced' ? [...advancedQuestions] : [...basicQuestions, ...advancedQuestions];
-        let idx = Math.floor(Math.random() * source.length);
-        currentPool.push(source.splice(idx, 1)[0]);
-    }
-    
+    let source = mode === 'basic' ? [...basicQuestions] : mode === 'advanced' ? [...advancedQuestions] : [...basicQuestions, ...advancedQuestions];
+    currentPool = [...source].sort(() => Math.random() - 0.5).slice(0, 10);
+    startTime = Date.now();
     document.getElementById("menuScreen").classList.remove("active");
     document.getElementById("gameScreen").classList.add("active");
     next();
 }
 
 function next() {
-    if(score >= 10) { alert("クリア！"); location.reload(); return; }
+    if(score >= 10) { 
+        let time = ((Date.now() - startTime)/1000).toFixed(2);
+        saveRanking(time);
+        alert("クリア！タイム: " + time + "秒"); location.reload(); return; 
+    }
     let q = currentPool[score];
-    document.getElementById("progress").innerText = `${score + 1} / 10`;
+    document.getElementById("progress").innerText = (score + 1) + " / 10";
     document.getElementById("reactionType").innerText = q.type;
     document.getElementById("equation").innerText = q.eq;
-    const labelContainer = document.getElementById("labels");
-    labelContainer.innerHTML = "";
-    if (q.labels) q.labels.forEach(l => { const s = document.createElement("span"); s.className = "label-item"; s.innerText = l; labelContainer.appendChild(s); });
 }
 
 function judge(choice) {
     if(!gameActive) return;
     if(choice === currentPool[score].correct) { score++; next(); } 
-    else { 
-        gameActive = false;
-        document.getElementById("btnContainer").style.display = "none";
-        document.getElementById("resultArea").innerHTML = `<div class="fail">MISS!</div><div class="correctAnswer">${currentPool[score].answer}</div><br><button class="smallBtn" onclick="location.reload()">メニューに戻る</button>`;
-    }
+    else { alert("MISS!"); location.reload(); }
 }
+
+function saveRanking(time) {
+    let ranks = JSON.parse(localStorage.getItem("rank_" + mode) || "[]");
+    ranks.push(parseFloat(time));
+    ranks.sort((a,b) => a - b);
+    localStorage.setItem("rank_" + mode, JSON.stringify(ranks.slice(0, 3)));
+}
+
+function loadRanking() {
+    let html = "";
+    ['basic', 'advanced', 'all'].forEach(m => {
+        let r = JSON.parse(localStorage.getItem("rank_" + m) || "[]");
+        let name = (m==='basic'?'化学基礎':m==='advanced'?'化学':'全部');
+        html += `<div>${name}: ${r.length ? r[0]+"秒" : "-"}</div>`;
+    });
+    document.getElementById("rankingList").innerHTML = html;
+}
+loadRanking();
 </script>
 </body>
 </html>
