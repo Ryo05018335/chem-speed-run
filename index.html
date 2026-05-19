@@ -49,6 +49,7 @@
             box-shadow: 0 6px 0 rgba(0,0,0,0.2);
         }
         .answerBtn:active { transform: translateY(4px); box-shadow: none; }
+        /* 色の指定 */
         #correctBtn { background: var(--correct); color: white; }
         #wrongBtn { background: var(--wrong); color: white; }
 
@@ -88,9 +89,10 @@
         <div id="equation">---</div>
         <div id="labels"></div>
     </div>
+    <!-- ボタンの順番を左○、右×に変更 -->
     <div id="btnContainer">
-        <button id="wrongBtn" class="answerBtn" onclick="judge(false)">×</button>
         <button id="correctBtn" class="answerBtn" onclick="judge(true)">○</button>
+        <button id="wrongBtn" class="answerBtn" onclick="judge(false)">×</button>
     </div>
     <div id="resultArea"></div>
 </div>
