@@ -127,14 +127,17 @@ function countdownStart() {
 
 function start() {
     score = 0; gameActive = true;
-    let source = mode === 'basic' ? [...basicQuestions] : mode === 'advanced' ? [...advancedQuestions] : [...basicQuestions, ...advancedQuestions];
-    currentPool = [...source].sort(() => Math.random() - 0.5).slice(0, 10);
-    startTime = Date.now();
+    startTime = Date.now(); // 追加
+    let source = mode === 'basic' ? [...basicQuestions] : 
+                 mode === 'advanced' ? [...advancedQuestions] : 
+                 [...basicQuestions, ...advancedQuestions];
+    
+    currentPool = [...source].sort(() => Math.random() - 0.5).slice(0, 10); // 簡略化
+    
     document.getElementById("menuScreen").classList.remove("active");
     document.getElementById("gameScreen").classList.add("active");
     next();
 }
-
 function next() {
     if(score >= 10) { 
         let time = ((Date.now() - startTime)/1000).toFixed(2);
@@ -142,7 +145,7 @@ function next() {
         alert("クリア！タイム: " + time + "秒"); location.reload(); return; 
     }
     let q = currentPool[score];
-    document.getElementById("progress").innerText = (score + 1) + " / 10";
+    document.getElementById("progress").innerText = `${score + 1} / 10`;
     document.getElementById("reactionType").innerText = q.type;
     document.getElementById("equation").innerText = q.eq;
 }
@@ -167,6 +170,24 @@ function loadRanking() {
         let name = (m==='basic'?'化学基礎':m==='advanced'?'化学':'全部');
         html += `<div>${name}: ${r.length ? r[0]+"秒" : "-"}</div>`;
     });
+    document.getElementById("rankingList").innerHTML = html;
+}
+loadRanking();
+    function saveRanking(time) {
+    let key = "rank_" + mode;
+    let ranks = JSON.parse(localStorage.getItem(key) || "[]");
+    ranks.push(parseFloat(time));
+    ranks.sort((a,b) => a - b);
+    localStorage.setItem(key, JSON.stringify(ranks.slice(0, 3)));
+}
+
+function loadRanking() {
+    let html = "";
+    const modes = { basic: "化学基礎", advanced: "化学", all: "全部" };
+    for(let m in modes) {
+        let r = JSON.parse(localStorage.getItem("rank_" + m) || "[]");
+        html += `<div><b>${modes[m]}</b>: ${r.length ? r[0]+"秒" : "-"}</div>`;
+    }
     document.getElementById("rankingList").innerHTML = html;
 }
 loadRanking();
