@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>化学反応式 SPEED RUN</title>
+    <style>
+        :root {
+            --bg: #0f172a; --card: #1e293b; --accent: #facc15;
+            --correct: #22c55e; --wrong: #ef4444; --blue: #3b82f6; --purple: #8b5cf6;
+        }
+        * { user-select: none; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; font-family: sans-serif; background: linear-gradient(135deg, var(--bg), #1e293b);
+            color: white; text-align: center; min-height: 100vh; touch-action: manipulation;
+        }
+        .screen { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        h1 { font-size: 1.8rem; color: var(--accent); margin-bottom: 20px; }
+        .modeButton {
+            width: 90%; max-width: 300px; height: 65px; margin: 8px; border: none; border-radius: 15px;
+            font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+        }
+        .modeButton:active { transform: translateY(2px); box-shadow: none; }
+        .basicBtn { background: var(--blue); color: white; }
+        .advancedBtn { background: var(--purple); color: white; }
+        .allBtn { background: var(--correct); color: white; }
+
+        #selectedModeText { font-size: 1.1rem; margin: 15px 0; color: #94a3b8; min-height: 1.5rem; }
+        #countdown { font-size: 5rem; height: 6rem; color: var(--correct); font-weight: bold; }
+
+        #equationContainer {
+            background: var(--card); border-radius: 20px; padding: 30px 15px;
+            margin: 10px auto 25px; width: 95%; max-width: 600px; min-height: 140px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        #equation { font-size: 1.4rem; line-height: 1.4; margin-bottom: 15px; word-break: break-all; font-weight: bold; }
+        #labels { font-size: 0.9rem; color: #93c5fd; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .label-item { border-top: 1px solid #475569; padding-top: 4px; }
+
+        #btnContainer { display: flex; justify-content: space-around; width: 100%; max-width: 500px; margin: 0 auto; }
+        .answerBtn {
+            width: 120px; height: 120px; border: none; border-radius: 50%;
+            font-size: 3.5rem; font-weight: bold; cursor: pointer; transition: 0.1s;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+        }
+        .answerBtn:active { transform: translateY(4px); box-shadow: none; }
+        #correctBtn { background: var(--correct); color: white; }
+        #wrongBtn { background: var(--wrong); color: white; }
+
+        #resultArea { margin-top: 20px; padding: 10px; }
+        .fail { color: var(--wrong); font-size: 2rem; font-weight: bold; margin-bottom: 10px; }
+        .correctAnswer { color: var(--accent); font-size: 1.1rem; font-weight: bold; line-height: 1.4; }
+
+        #rankingArea { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px; }
+        .rankingBox { background: var(--card); padding: 10px; border-radius: 12px; width: 90%; max-width: 300px; text-align: left; font-size: 0.9rem; }
+        .rankItem { display: flex; justify-content: space-between; margin: 3px 0; }
+        input { padding: 12px; border-radius: 10px; border: none; font-size: 1rem; width: 80%; max-width: 250px; text-align: center; margin-bottom: 10px; }
+        .smallBtn { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; background: #64748b; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="menuScreen" class="screen active">
+    <h1>化学反応式 SPEED RUN</h1>
+    <button class="modeButton basicBtn" onclick="selectMode('basic')">化学基礎</button><br>
+    <button class="modeButton advancedBtn" onclick="selectMode('advanced')">化学</button><br>
+    <button class="modeButton allBtn" onclick="selectMode('all')">全部</button>
+    <div id="selectedModeText">モードを選択してください</div>
+    <div id="countdown"></div>
+    <button id="startGameBtn" class="modeButton allBtn" style="display:none;" onclick="countdownStart()">START</button>
+
+    <div id="rankingArea">
+        <div class="rankingBox"><strong>🏆 化学基礎 TOP3</strong><div id="basicRanking"></div></div>
+        <div class="rankingBox"><strong>🏆 化学 TOP3</strong><div id="advancedRanking"></div></div>
+        <div class="rankingBox"><strong>🏆 全部 TOP3</strong><div id="allRanking"></div></div>
+    </div>
+</div>
+
+<div id="gameScreen" class="screen">
+    <div id="reactionType" style="color:#93c5fd; font-size:1rem;">---</div>
+    <div id="progress" style="font-size:1.8rem; color:var(--accent); margin: 5px 0;">0 / 10</div>
+    <div id="equationContainer">
+        <div id="equation">---</div>
+        <div id="labels"></div>
+    </div>
+    <div id="btnContainer">
+        <button id="wrongBtn" class="answerBtn" onclick="judge(false)">×</button>
+        <button id="correctBtn" class="answerBtn" onclick="judge(true)">○</button>
+    </div>
+    <div id="resultArea"></div>
+</div>
+
+<div id="registerScreen" class="screen">
+    <h1>🎉 CLEAR!!</h1>
+    <div id="clearTime" style="font-size: 3rem; color: var(--accent); font-weight: bold; margin-bottom: 20px;"></div>
+    <input id="username" maxlength="8" placeholder="名前 (8文字以内)"><br>
+    <button class="modeButton allBtn" onclick="registerRanking()">記録を保存</button>
+</div>
+
+<script>
+const basicQuestions = [
+    { type:"中和", eq:"HCl + NaOH → NaCl + H₂O", correct:true, answer:"HCl + NaOH → NaCl + H₂O" },
+    { type:"中和", eq:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O", correct:true, answer:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O" },
+    { type:"中和", eq:"H₂SO₄ + NaOH → Na₂SO₄ + H₂O", correct:false, answer:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O" },
+    { type:"酸化還元", eq:"2Mg + O₂ → 2MgO", correct:true, answer:"2Mg + O₂ → 2MgO" },
+    { type:"熱分解", eq:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂", correct:true, answer:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂" },
+    { type:"熱分解", eq:"NaHCO₃ → NaCO₃ + H₂O + CO₂", correct:false, answer:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂" },
+    { type:"燃焼", eq:"CH₄ + 2O₂ → CO₂ + 2H₂O", correct:true, answer:"CH₄ + 2O₂ → CO₂ + 2H₂O" },
+    { type:"酸化還元", eq:"MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O", correct:true, answer:"酸化還元反応の半反応式" }
+];
+
+const advancedQuestions = [
+    { type:"置換反応", eq:"C₆H₆ + HNO₃ → C₆H₅NO₂ + H₂O", correct:true, labels:["ベンゼン", "硝酸", "ニトロベンゼン"], answer:"ニトロ化" },
+    { type:"置換反応", eq:"C₆H₆ + H₂SO₄ → C₆H₅SO₃H + H₂O", correct:true, labels:["ベンゼン", "硫酸", "ベンゼンスルホン酸"], answer:"スルホン化" },
+    { type:"付加反応", eq:"C₆H₆ + 3H₂ → C₆H₁₂", correct:true, labels:["ベンゼン", "水素", "シクロヘキサン"], answer:"水素付加" },
+    { type:"置換反応", eq:"C₆H₆ + Cl₂ → C₆H₅Cl + HCl", correct:true, labels:["ベンゼン", "塩素", "クロロベンゼン"], answer:"鉄触媒による置換" },
+    { type:"クメン法", eq:"C₆H₅CH(CH₃)₂ + O₂ → C₆H₅OH + CH₃COCH₃", correct:true, labels:["クメン", "酸素", "フェノール", "アセトン"], answer:"クメン法" },
+    { type:"中和", eq:"C₆H₅OH + NaOH → C₆H₅ONa + H₂O", correct:true, labels:["フェノール", "水酸化Na", "Naフェノキシド"], answer:"フェノールの塩" },
+    { type:"銀鏡反応", eq:"R-CHO + 2[Ag(NH₃)₂]⁺ + 2OH⁻ → R-COOH + 2Ag + 4NH₃ + H₂O", correct:true, answer:"銀鏡反応" },
+    { type:"オストワルト法", eq:"4NH₃ + 5O₂ → 4NO + 6H₂O", correct:true, answer:"アンモニアの酸化" }
+];
+
+let mode = ""; let fullPool = []; let currentPool = []; let currentQ; 
+let score = 0; let startTime; let gameActive = false;
+
+function selectMode(m) {
+    mode = m;
+    fullPool = m === 'basic' ? [...basicQuestions] : m === 'advanced' ? [...advancedQuestions] : [...basicQuestions, ...advancedQuestions];
+    document.getElementById("selectedModeText").innerText = "モード: " + (m==='basic'?'化学基礎':m==='advanced'?'化学':'全部');
+    document.getElementById("startGameBtn").style.display = "inline-block";
+}
+
+function getSmartPool(raw) {
+    let result = []; let tempRaw = [...raw];
+    for(let i=0; i<10; i++) {
+        let attempts = 0;
+        while(attempts < 50) {
+            let idx = Math.floor(Math.random() * tempRaw.length);
+            let candidate = tempRaw[idx] || raw[Math.floor(Math.random()*raw.length)];
+            if(result.length >= 2 && candidate.correct === result[result.length-1].correct && candidate.correct === result[result.length-2].correct) {
+                attempts++; continue;
+            }
+            result.push(candidate);
+            if(tempRaw[idx]) tempRaw.splice(idx, 1);
+            break;
+        }
+    }
+    return result;
+}
+
+function countdownStart() {
+    let count = 3; document.getElementById("startGameBtn").style.display = "none";
+    const cd = document.getElementById("countdown");
+    const t = setInterval(() => {
+        cd.innerText = count > 0 ? count : count === 0 ? "GO!" : "";
+        if(count < -1) { clearInterval(t); start(); }
+        count--;
+    }, 700);
+}
+
+function start() {
+    score = 0; gameActive = true;
+    currentPool = getSmartPool(fullPool);
+    document.getElementById("menuScreen").classList.remove("active");
+    document.getElementById("gameScreen").classList.add("active");
+    document.getElementById("btnContainer").style.display = "flex";
+    document.getElementById("resultArea").innerHTML = "";
+    startTime = Date.now(); next();
+}
+
+function next() {
+    if(score >= 10) { win(); return; }
+    currentQ = currentPool[score];
+    document.getElementById("progress").innerText = `${score} / 10`;
+    document.getElementById("reactionType").innerText = currentQ.type;
+    document.getElementById("equation").innerText = currentQ.eq;
+    const labelContainer = document.getElementById("labels");
+    labelContainer.innerHTML = "";
+    if (currentQ.labels) {
+        currentQ.labels.forEach(name => {
+            const span = document.createElement("span");
+            span.className = "label-item";
+            span.innerText = name;
+            labelContainer.appendChild(span);
+        });
+    }
+}
+
+function judge(choice) {
+    if(!gameActive) return;
+    if(choice === currentQ.correct) { score++; next(); } 
+    else { fail(); }
+}
+
+function fail() {
+    gameActive = false; document.getElementById("btnContainer").style.display = "none";
+    document.getElementById("resultArea").innerHTML = `<div class="fail">MISS!</div><div class="correctAnswer">${currentQ.answer}</div><br><button class="smallBtn" onclick="backToMenu()">戻る</button>`;
+}
+
+function win() {
+    gameActive = false; const time = ((Date.now() - startTime) / 1000).toFixed(2);
+    document.getElementById("gameScreen").classList.remove("active");
+    document.getElementById("registerScreen").classList.add("active");
+    document.getElementById("clearTime").innerText = time + "s";
+    window.lastTime = time;
+}
+
+function registerRanking() {
+    const name = document.getElementById("username").value || "匿名";
+    const key = "chem_rank_" + mode;
+    let ranks = JSON.parse(localStorage.getItem(key) || "[]");
+    ranks.push({name, time: parseFloat(window.lastTime)});
+    ranks.sort((a,b) => a.time - b.time);
+    localStorage.setItem(key, JSON.stringify(ranks.slice(0, 3)));
+    backToMenu();
+}
+
+function updateRankDisplay() {
+    ['basic', 'advanced', 'all'].forEach(m => {
+        const ranks = JSON.parse(localStorage.getItem("chem_rank_" + m) || "[]");
+        document.getElementById(m + "Ranking").innerHTML = ranks.map((r, i) => `<div class="rankItem"><span>${i+1}. ${r.name}</span><span>${r.time}s</span></div>`).join('') || "記録なし";
+    });
+}
+
+function backToMenu() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById("menuScreen").classList.add("active");
+    document.getElementById("countdown").innerText = "";
+    updateRankDisplay();
+}
+
+updateRankDisplay();
+</script>
+</body>
+</html>
