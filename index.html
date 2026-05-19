@@ -2,37 +2,61 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>化学反応式 SPEED RUN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化学反応式 SPEED RUN - 究極版</title>
     <style>
         :root {
             --bg: #0f172a; --card: #1e293b; --accent: #facc15;
             --correct: #22c55e; --wrong: #ef4444; --blue: #3b82f6; --purple: #8b5cf6;
         }
-        * { user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: sans-serif; background: linear-gradient(135deg, var(--bg), #1e293b); color: white; text-align: center; min-height: 100vh; touch-action: manipulation; }
-        .screen { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        body {
+            margin: 0; font-family: sans-serif; background: linear-gradient(135deg, var(--bg), #1e293b);
+            color: white; text-align: center; min-height: 100vh;
+        }
+        .screen { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        h1 { font-size: 1.8rem; color: var(--accent); margin-bottom: 20px; }
-        .modeButton { width: 90%; max-width: 300px; height: 60px; margin: 8px; border: none; border-radius: 15px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
-        .modeButton:active { transform: translateY(2px); box-shadow: none; }
-        .basicBtn { background: var(--blue); }
-        .advancedBtn { background: var(--purple); }
-        .allBtn { background: var(--correct); }
-        #selectedModeText { font-size: 1.1rem; margin: 15px 0; color: #94a3b8; }
-        #countdown { font-size: 5rem; height: 6rem; color: var(--correct); font-weight: bold; }
-        #equationContainer { background: var(--card); border-radius: 20px; padding: 30px 15px; margin: 10px auto 25px; width: 95%; max-width: 600px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
-        #equation { font-size: 1.4rem; font-weight: bold; margin-bottom: 15px; word-break: break-all; }
-        .answerBtn { width: 120px; height: 120px; border: none; border-radius: 50%; font-size: 3.5rem; font-weight: bold; cursor: pointer; transition: 0.1s; box-shadow: 0 6px 0 rgba(0,0,0,0.2); margin: 10px; }
-        .answerBtn:active { transform: translateY(4px); box-shadow: none; }
-        #correctBtn { background: var(--correct); }
-        #wrongBtn { background: var(--wrong); }
-        .rankingBox { background: var(--card); padding: 15px; border-radius: 15px; width: 85%; max-width: 300px; margin: 20px auto; text-align: left; font-size: 0.9rem; color: #cbd5e1; }
-        .smallBtn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; background: #64748b; color: white; margin-top: 15px; }<div class="rankingBox">
-    <strong>🏆 BEST TIME (TOP3)</strong>
-    <div id="rankingList"></div>
-</div>
+
+        h1 { font-size: 2.2rem; color: var(--accent); margin-bottom: 30px; }
+        .modeButton {
+            width: 280px; height: 70px; margin: 10px; border: none; border-radius: 15px;
+            font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+        }
+        .modeButton:active { transform: translateY(4px); box-shadow: none; }
+        .basicBtn { background: var(--blue); color: white; }
+        .advancedBtn { background: var(--purple); color: white; }
+        .allBtn { background: var(--correct); color: white; }
+
+        #selectedModeText { font-size: 1.4rem; margin: 20px 0; color: #94a3b8; min-height: 1.5rem; }
+        #countdown { font-size: 6rem; height: 8rem; color: var(--correct); font-weight: bold; }
+
+        #equationContainer {
+            background: var(--card); border-radius: 20px; padding: 40px 20px;
+            margin: 20px auto 30px; max-width: 950px; min-height: 140px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        #equation { font-size: 1.8rem; line-height: 1.2; margin-bottom: 15px; word-break: break-all; }
+        #labels { font-size: 1rem; color: #93c5fd; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .label-item { border-top: 1px solid #475569; padding-top: 5px; }
+
+        .answerBtn {
+            width: 140px; height: 140px; margin: 0 20px; border: none; border-radius: 50%;
+            font-size: 4rem; font-weight: bold; cursor: pointer; transition: 0.1s;
+        }
+        #correctBtn { background: var(--correct); color: white; }
+        #wrongBtn { background: var(--wrong); color: white; }
+
+        #resultArea { margin-top: 20px; padding: 20px; }
+        .fail { color: var(--wrong); font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; }
+        .correctAnswer { color: var(--accent); font-size: 1.4rem; font-weight: bold; }
+
+        .rankingBox { background: var(--card); padding: 15px; border-radius: 15px; width: 220px; text-align: left; }
+        #rankingArea { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 30px; }
+        .rankItem { font-size: 0.9rem; margin: 4px 0; display: flex; justify-content: space-between; }
+        input { padding: 12px; border-radius: 10px; border: none; font-size: 1.1rem; width: 240px; text-align: center; margin-bottom: 10px; }
+        .smallBtn { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; background: #64748b; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -45,77 +69,109 @@
     <div id="selectedModeText">モードを選択してください</div>
     <div id="countdown"></div>
     <button id="startGameBtn" class="modeButton allBtn" style="display:none;" onclick="countdownStart()">START</button>
-    <div class="rankingBox"><strong>🏆 BEST TIME (TOP3)</strong><div id="rankingList">記録なし</div></div>
+
+    <div id="rankingArea">
+        <div class="rankingBox"><h3>🏆 化学基礎</h3><div id="basicRanking"></div></div>
+        <div class="rankingBox"><h3>🏆 化学</h3><div id="advancedRanking"></div></div>
+        <div class="rankingBox"><h3>🏆 全部</h3><div id="allRanking"></div></div>
+    </div>
 </div>
 
 <div id="gameScreen" class="screen">
-    <div id="reactionType" style="color:#93c5fd; font-size:1rem;">---</div>
-    <div id="progress" style="font-size:1.8rem; color:var(--accent); margin: 5px 0;">0 / 10</div>
+    <div id="reactionType" style="color:#93c5fd; font-weight:bold; font-size:1.2rem;">---</div>
+    <div id="progress" style="font-size:2rem; color:var(--accent); margin: 10px 0;">0 / 10</div>
     <div id="equationContainer">
         <div id="equation">---</div>
+        <div id="labels"></div>
     </div>
     <div id="btnContainer">
-        <button id="wrongBtn" class="answerBtn" onclick="judge(false)">×</button>
         <button id="correctBtn" class="answerBtn" onclick="judge(true)">○</button>
+        <button id="wrongBtn" class="answerBtn" onclick="judge(false)">×</button>
     </div>
     <div id="resultArea"></div>
 </div>
 
+<div id="registerScreen" class="screen">
+    <h1>🎉 CLEAR!!</h1>
+    <div id="clearTime" style="font-size: 4rem; color: var(--accent); font-weight: bold; margin-bottom: 20px;"></div>
+    <input id="username" maxlength="10" placeholder="名前を入力"><br>
+    <button class="modeButton allBtn" onclick="registerRanking()">保存する</button>
+</div>
+
 <script>
-    // 全問題データ（化学基礎）
 const basicQuestions = [
-    { type: "中和", eq: "HCl + NaOH → NaCl + H₂O", correct: true },
-    { type: "中和", eq: "H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O", correct: true },
-    { type: "中和", eq: "H₂SO₄ + NaOH → Na₂SO₄ + H₂O", correct: false },
-    { type: "酸化還元", eq: "2Mg + O₂ → 2MgO", correct: true },
-    { type: "酸化還元", eq: "Mg + O₂ → MgO", correct: false },
-    { type: "熱分解", eq: "2NaHCO₃ → Na₂CO₃ + H₂O + CO₂", correct: true },
-    { type: "燃焼", eq: "CH₄ + 2O₂ → CO₂ + 2H₂O", correct: true },
-    { type: "酸化還元", eq: "MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O", correct: true },
-    { type: "中和", eq: "CH₃COOH + NaOH → CH₃COONa + H₂O", correct: true },
-    { type: "沈殿", eq: "Ag⁺ + Cl⁻ → AgCl", correct: true },
-    { type: "中和", eq: "HCl + Ca(OH)₂ → CaCl₂ + 2H₂O", correct: true },
-    { type: "酸化還元", eq: "2H₂ + O₂ → 2H₂O", correct: true },
-    { type: "熱分解", eq: "CaCO₃ → CaO + CO₂", correct: true },
-    { type: "酸化還元", eq: "Fe + S → FeS", correct: true },
-    { type: "酸化還元", eq: "2H₂O₂ → 2H₂O + O₂", correct: true },
-    { type: "中和", eq: "2HCl + Ca(OH)₂ → CaCl₂ + 2H₂O", correct: true },
-    { type: "沈殿", eq: "Ba²⁺ + SO₄²⁻ → BaSO₄", correct: true },
-    { type: "酸化還元", eq: "Cu + 2Ag⁺ → Cu²⁺ + 2Ag", correct: true },
-    { type: "中和", eq: "HNO₃ + KOH → KNO₃ + H₂O", correct: true },
-    { type: "燃焼", eq: "2CO + O₂ → 2CO₂", correct: true }
+    { type:"中和", eq:"HCl + NaOH → NaCl + H₂O", correct:true, answer:"HCl + NaOH → NaCl + H₂O" },
+    { type:"中和", eq:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O", correct:true, answer:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O" },
+    { type:"中和", eq:"H₂SO₄ + NaOH → Na₂SO₄ + H₂O", correct:false, answer:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O (係数ミス)" },
+    { type:"中和", eq:"CH₃COOH + NaOH → CH₃COONa + H₂O", correct:true, answer:"CH₃COOH + NaOH → CH₃COONa + H₂O" },
+    { type:"酸化還元", eq:"2Mg + O₂ → 2MgO", correct:true, answer:"2Mg + O₂ → 2MgO" },
+    { type:"酸化還元", eq:"Mg + O₂ → MgO₂", correct:false, answer:"2Mg + O₂ → 2MgO (組成ミス)" },
+    { type:"酸化還元", eq:"Zn + 2HCl → ZnCl₂ + H₂", correct:true, answer:"Zn + 2HCl → ZnCl₂ + H₂" },
+    { type:"酸化還元", eq:"MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O", correct:true, answer:"MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O" },
+    { type:"熱分解", eq:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂", correct:true, answer:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂" },
+    { type:"熱分解", eq:"NaHCO₃ → NaCO₃ + H₂O + CO₂", correct:false, answer:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂ (係数・組成ミス)" },
+    { type:"燃焼", eq:"CH₄ + 2O₂ → CO₂ + 2H₂O", correct:true, answer:"CH₄ + 2O₂ → CO₂ + 2H₂O" },
+    { type:"燃焼", eq:"CH₄ + O₂ → CO₂ + H₂O", correct:false, answer:"CH₄ + 2O₂ → CO₂ + 2H₂O (係数ミス)" },
+    { type:"電離", eq:"H₂SO₄ → 2H⁺ + SO₄²⁻", correct:true, answer:"H₂SO₄ → 2H⁺ + SO₄²⁻" },
+    { type:"電離", eq:"H₂SO₄ → H₂⁺ + SO₄²⁻", correct:false, answer:"H₂SO₄ → 2H⁺ + SO₄²⁻ (イオン表記ミス)" },
+    { type:"酸化還元", eq:"2I⁻ → I₂ + 2e⁻", correct:true, answer:"2I⁻ → I₂ + 2e⁻" }
 ];
 
-// 全問題データ（化学）
 const advancedQuestions = [
-    { type: "置換", eq: "C₆H₆ + HNO₃ → C₆H₅NO₂ + H₂O", correct: true },
-    { type: "置換", eq: "C₆H₆ + H₂SO₄ → C₆H₅SO₃H + H₂O", correct: true },
-    { type: "付加", eq: "C₆H₆ + 3H₂ → C₆H₁₂", correct: true },
-    { type: "置換", eq: "C₆H₆ + Cl₂ → C₆H₅Cl + HCl", correct: true },
-    { type: "クメン法", eq: "C₆H₅CH(CH₃)₂ + O₂ → C₆H₅OH + CH₃COCH₃", correct: true },
-    { type: "中和", eq: "C₆H₅OH + NaOH → C₆H₅ONa + H₂O", correct: true },
-    { type: "銀鏡反応", eq: "R-CHO + 2[Ag(NH₃)₂]⁺ + 2OH⁻ → R-COOH + 2Ag + 4NH₃ + H₂O", correct: true },
-    { type: "酸化", eq: "4NH₃ + 5O₂ → 4NO + 6H₂O", correct: true },
-    { type: "エステル化", eq: "CH₃COOH + C₂H₅OH → CH₃COOC₂H₅ + H₂O", correct: true },
-    { type: "付加", eq: "CH₂=CH₂ + H₂ → CH₃CH₃", correct: true },
-    { type: "付加", eq: "CH₂=CH₂ + Br₂ → CH₂BrCH₂Br", correct: true },
-    { type: "置換", eq: "CH₄ + Cl₂ → CH₃Cl + HCl", correct: true },
-    { type: "加水分解", eq: "CH₃COOC₂H₅ + H₂O → CH₃COOH + C₂H₅OH", correct: true },
-    { type: "中和", eq: "R-COOH + NaOH → R-COONa + H₂O", correct: true },
-    { type: "酸化", eq: "CH₃CH₂OH → CH₃CHO → CH₃COOH", correct: true },
-    { type: "還元", eq: "CH₃CHO + H₂ → CH₃CH₂OH", correct: true },
-    { type: "脱水", eq: "2C₂H₅OH → C₂H₅OC₂H₅ + H₂O", correct: true },
-    { type: "付加", eq: "CH≡CH + 2H₂ → CH₃CH₃", correct: true },
-    { type: "置換", eq: "C₆H₅OH + 3HNO₃ → C₆H₂(NO₂)₃OH + 3H₂O", correct: true },
-    { type: "合成", eq: "n(CH₂=CH₂) → -(CH₂-CH₂)-n", correct: true }
+    { type:"置換反応", eq:"C₆H₆ + HNO₃ → C₆H₅NO₂ + H₂O", correct:true, labels:["ベンゼン", "硝酸", "ニトロベンゼン"], answer:"ベンゼンのニトロ化" },
+    { type:"付加反応", eq:"C₆H₆ + 3Cl₂ → C₆H₆Cl₆", correct:true, labels:["ベンゼン", "塩素", "ベンゼンヘキサクロリド"], answer:"ベンゼンへの塩素付加" },
+    { type:"付加反応", eq:"C₆H₆ + Cl₂ → C₆H₅Cl + HCl", correct:true, labels:["ベンゼン", "塩素", "クロロベンゼン"], answer:"鉄触媒による置換反応" },
+    { type:"付加反応", eq:"C₆H₆ + 3H₂ → C₆H₁₂", correct:true, labels:["ベンゼン", "水素", "シクロヘキサン"], answer:"ベンゼンへの水素付加" },
+    { type:"置換反応", eq:"C₆H₆ + 2HNO₃ → C₆H₅NO₂ + H₂O", correct:false, labels:["ベンゼン", "硝酸"], answer:"HNO₃の係数は1です" },
+    { type:"工業的製法", eq:"C₆H₅CH(CH₃)₂ + O₂ → C₆H₅OH + CH₃COCH₃", correct:true, labels:["クメン", "酸素", "フェノール", "アセトン"], answer:"クメン法" },
+    { type:"中和", eq:"C₆H₅OH + NaOH → C₆H₅ONa + H₂O", correct:true, labels:["フェノール", "水酸化ナトリウム", "ナトリウムフェノキシド"], answer:"フェノールの塩形成" },
+    { type:"エステル化", eq:"CH₃COOH + C₂H₅OH → CH₃COOC₂H₅ + H₂O", correct:true, answer:"エステル化" },
+    { type:"オストワルト法", eq:"4NH₃ + 5O₂ → 4NO + 6H₂O", correct:true, answer:"アンモニアの酸化" },
+    { type:"接触法", eq:"2SO₂ + O₂ → 2SO₃", correct:true, answer:"二酸化硫黄の酸化" },
+    { type:"ハーバー法", eq:"N₂ + 3H₂ → 2NH₃", correct:true, answer:"アンモニアの直接合成" },
+    { type:"希硝酸", eq:"3Cu + 8HNO₃ → 3Cu(NO₃)₂ + 2NO + 4H₂O", correct:true, answer:"銅と希硝酸の反応" },
+    { type:"濃硝酸", eq:"Cu + 4HNO₃ → Cu(NO₃)₂ + 2NO₂ + 2H₂O", correct:true, answer:"銅と濃硝酸の反応" },
+    { type:"塩素発生", eq:"MnO₂ + 4HCl → MnCl₂ + 2H₂O + Cl₂", correct:true, answer:"酸化マンガン(IV)と塩酸" },
+    { type:"塩素発生", eq:"MnO₂ + 2HCl → MnCl₂ + H₂O + Cl₂", correct:false, answer:"係数が合いません (4HCl, 2H₂O)" }
 ];
 
-let mode = "", currentPool = [], score = 0, startTime = 0, gameActive = false;
+let mode = ""; let fullPool = []; let currentPool = []; let currentQ; 
+let score = 0; let startTime; let gameActive = false;
 
 function selectMode(m) {
     mode = m;
-    document.getElementById("selectedModeText").innerText = "モード: " + (m==='basic'?'化学基礎':m==='advanced'?'化学':'全部');
+    fullPool = m === 'basic' ? [...basicQuestions] : m === 'advanced' ? [...advancedQuestions] : [...basicQuestions, ...advancedQuestions];
+    document.getElementById("selectedModeText").innerText = "モード: " + (m==='basic'?'基礎':m==='advanced'?'化学':'全部');
     document.getElementById("startGameBtn").style.display = "inline-block";
+}
+
+function getSmartPool(raw) {
+    let result = [];
+    let tempRaw = [...raw];
+    
+    for(let i=0; i<10; i++) {
+        let attempts = 0;
+        let found = false;
+        while(attempts < 50) {
+            let idx = Math.floor(Math.random() * tempRaw.length);
+            let candidate = tempRaw[idx];
+            
+            // 3回連続の判定
+            if(result.length >= 2) {
+                if(candidate.correct === result[result.length-1].correct && 
+                   candidate.correct === result[result.length-2].correct) {
+                    attempts++;
+                    continue;
+                }
+            }
+            result.push(candidate);
+            tempRaw.splice(idx, 1);
+            found = true;
+            break;
+        }
+        if(!found) result.push(tempRaw.pop()); // 詰まったら強制追加
+    }
+    return result;
 }
 
 function countdownStart() {
@@ -123,77 +179,84 @@ function countdownStart() {
     const cd = document.getElementById("countdown");
     const t = setInterval(() => {
         cd.innerText = count > 0 ? count : count === 0 ? "GO!" : "";
-        if(count < -1) { clearInterval(t); cd.innerText = ""; start(); }
+        if(count < -1) { clearInterval(t); start(); }
         count--;
-    }, 700);
+    }, 800);
 }
 
 function start() {
     score = 0; gameActive = true;
-    startTime = Date.now(); // 追加
-    let source = mode === 'basic' ? [...basicQuestions] : 
-                 mode === 'advanced' ? [...advancedQuestions] : 
-                 [...basicQuestions, ...advancedQuestions];
-    
-    currentPool = [...source].sort(() => Math.random() - 0.5).slice(0, 10); // 簡略化
-    
+    currentPool = getSmartPool(fullPool);
     document.getElementById("menuScreen").classList.remove("active");
     document.getElementById("gameScreen").classList.add("active");
-    next();
+    document.getElementById("btnContainer").style.display = "block";
+    document.getElementById("resultArea").innerHTML = "";
+    startTime = Date.now(); next();
 }
+
 function next() {
-    if(score >= 10) { 
-        let time = ((Date.now() - startTime)/1000).toFixed(2);
-        saveRanking(time);
-        alert("クリア！タイム: " + time + "秒"); location.reload(); return; 
+    if(score >= 10) { win(); return; }
+    currentQ = currentPool[score];
+    document.getElementById("progress").innerText = `${score} / 10`;
+    document.getElementById("reactionType").innerText = currentQ.type;
+    document.getElementById("equation").innerText = currentQ.eq;
+    
+    const labelContainer = document.getElementById("labels");
+    labelContainer.innerHTML = "";
+    if (currentQ.labels) {
+        currentQ.labels.forEach(name => {
+            const span = document.createElement("span");
+            span.className = "label-item";
+            span.innerText = name;
+            labelContainer.appendChild(span);
+        });
     }
-    let q = currentPool[score];
-    document.getElementById("progress").innerText = `${score + 1} / 10`;
-    document.getElementById("reactionType").innerText = q.type;
-    document.getElementById("equation").innerText = q.eq;
 }
 
 function judge(choice) {
     if(!gameActive) return;
-    if(choice === currentPool[score].correct) { score++; next(); } 
-    else { alert("MISS!"); location.reload(); }
+    if(choice === currentQ.correct) { score++; next(); } 
+    else { fail(); }
 }
 
-function saveRanking(time) {
-    let ranks = JSON.parse(localStorage.getItem("rank_" + mode) || "[]");
-    ranks.push(parseFloat(time));
-    ranks.sort((a,b) => a - b);
-    localStorage.setItem("rank_" + mode, JSON.stringify(ranks.slice(0, 3)));
+function fail() {
+    gameActive = false; document.getElementById("btnContainer").style.display = "none";
+    document.getElementById("resultArea").innerHTML = `<div class="fail">MISS!</div><div class="correctAnswer">正解の考え方: ${currentQ.answer}</div><button class="smallBtn" onclick="backToMenu()" style="margin-top:20px;">メニューへ</button>`;
 }
 
-function loadRanking() {
-    let html = "";
-    ['basic', 'advanced', 'all'].forEach(m => {
-        let r = JSON.parse(localStorage.getItem("rank_" + m) || "[]");
-        let name = (m==='basic'?'化学基礎':m==='advanced'?'化学':'全部');
-        html += `<div>${name}: ${r.length ? r[0]+"秒" : "-"}</div>`;
-    });
-    document.getElementById("rankingList").innerHTML = html;
+function win() {
+    gameActive = false; const time = ((Date.now() - startTime) / 1000).toFixed(2);
+    document.getElementById("gameScreen").classList.remove("active");
+    document.getElementById("registerScreen").classList.add("active");
+    document.getElementById("clearTime").innerText = time + "s";
+    window.lastTime = time;
 }
-loadRanking();
-    function saveRanking(time) {
-    let key = "rank_" + mode;
+
+function registerRanking() {
+    const name = document.getElementById("username").value || "匿名";
+    const key = "chem_rank_" + mode;
     let ranks = JSON.parse(localStorage.getItem(key) || "[]");
-    ranks.push(parseFloat(time));
-    ranks.sort((a,b) => a - b);
-    localStorage.setItem(key, JSON.stringify(ranks.slice(0, 3)));
+    ranks.push({name, time: parseFloat(window.lastTime)});
+    ranks.sort((a,b) => a.time - b.time);
+    localStorage.setItem(key, JSON.stringify(ranks.slice(0, 5)));
+    backToMenu();
 }
 
-function loadRanking() {
-    let html = "";
-    const modes = { basic: "化学基礎", advanced: "化学", all: "全部" };
-    for(let m in modes) {
-        let r = JSON.parse(localStorage.getItem("rank_" + m) || "[]");
-        html += `<div><b>${modes[m]}</b>: ${r.length ? r[0]+"秒" : "-"}</div>`;
-    }
-    document.getElementById("rankingList").innerHTML = html;
+function updateRankDisplay() {
+    ['basic', 'advanced', 'all'].forEach(m => {
+        const ranks = JSON.parse(localStorage.getItem("chem_rank_" + m) || "[]");
+        document.getElementById(m + "Ranking").innerHTML = ranks.map((r, i) => `<div class="rankItem"><span>${i+1}. ${r.name}</span><span>${r.time}s</span></div>`).join('') || "記録なし";
+    });
 }
-loadRanking();
+
+function backToMenu() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById("menuScreen").classList.add("active");
+    document.getElementById("countdown").innerText = "";
+    updateRankDisplay();
+}
+
+updateRankDisplay();
 </script>
 </body>
 </html>
