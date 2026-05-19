@@ -49,7 +49,6 @@
             box-shadow: 0 6px 0 rgba(0,0,0,0.2);
         }
         .answerBtn:active { transform: translateY(4px); box-shadow: none; }
-        /* 色の指定 */
         #correctBtn { background: var(--correct); color: white; }
         #wrongBtn { background: var(--wrong); color: white; }
 
@@ -89,10 +88,9 @@
         <div id="equation">---</div>
         <div id="labels"></div>
     </div>
-    <!-- ボタンの順番を左○、右×に変更 -->
     <div id="btnContainer">
-        <button id="correctBtn" class="answerBtn" onclick="judge(true)">○</button>
         <button id="wrongBtn" class="answerBtn" onclick="judge(false)">×</button>
+        <button id="correctBtn" class="answerBtn" onclick="judge(true)">○</button>
     </div>
     <div id="resultArea"></div>
 </div>
@@ -106,53 +104,31 @@
 
 <script>
 const basicQuestions = [
-    { type:"中和", eq:"HCl + NaOH → NaCl + H₂O", correct:true, answer:"HCl + NaOH → NaCl + H₂O" },
-    { type:"中和", eq:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O", correct:true, answer:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O" },
-    { type:"中和", eq:"H₂SO₄ + NaOH → Na₂SO₄ + H₂O", correct:false, answer:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O" },
-    { type:"酸化還元", eq:"2Mg + O₂ → 2MgO", correct:true, answer:"2Mg + O₂ → 2MgO" },
-    { type:"熱分解", eq:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂", correct:true, answer:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂" },
-    { type:"熱分解", eq:"NaHCO₃ → NaCO₃ + H₂O + CO₂", correct:false, answer:"2NaHCO₃ → Na₂CO₃ + H₂O + CO₂" },
-    { type:"燃焼", eq:"CH₄ + 2O₂ → CO₂ + 2H₂O", correct:true, answer:"CH₄ + 2O₂ → CO₂ + 2H₂O" },
-    { type:"酸化還元", eq:"MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O", correct:true, answer:"酸化還元反応の半反応式" }
+    { type:"中和", eq:"HCl + NaOH → NaCl + H2O", correct:true, answer:"HCl + NaOH → NaCl + H2O" },
+    { type:"中和", eq:"H2SO4 + 2NaOH → Na2SO4 + 2H2O", correct:true, answer:"H2SO4 + 2NaOH → Na2SO4 + 2H2O" },
+    { type:"中和", eq:"H2SO4 + NaOH → Na2SO4 + H2O", correct:false, answer:"H2SO4 + 2NaOH → Na2SO4 + 2H2O" },
+    { type:"酸化還元", eq:"2Mg + O2 → 2MgO", correct:true, answer:"2Mg + O2 → 2MgO" },
+    { type:"熱分解", eq:"2NaHCO3 → Na2CO3 + H2O + CO2", correct:true, answer:"2NaHCO3 → Na2CO3 + H2O + CO2" },
+    { type:"熱分解", eq:"NaHCO3 → NaCO3 + H2O + CO2", correct:false, answer:"2NaHCO3 → Na2CO3 + H2O + CO2" },
+    { type:"燃焼", eq:"CH4 + 2O2 → CO2 + 2H2O", correct:true, answer:"CH4 + 2O2 → CO2 + 2H2O" }
 ];
 
 const advancedQuestions = [
-    { type:"置換反応", eq:"C₆H₆ + HNO₃ → C₆H₅NO₂ + H₂O", correct:true, labels:["ベンゼン", "硝酸", "ニトロベンゼン"], answer:"ニトロ化" },
-    { type:"置換反応", eq:"C₆H₆ + H₂SO₄ → C₆H₅SO₃H + H₂O", correct:true, labels:["ベンゼン", "硫酸", "ベンゼンスルホン酸"], answer:"スルホン化" },
-    { type:"付加反応", eq:"C₆H₆ + 3H₂ → C₆H₁₂", correct:true, labels:["ベンゼン", "水素", "シクロヘキサン"], answer:"水素付加" },
-    { type:"置換反応", eq:"C₆H₆ + Cl₂ → C₆H₅Cl + HCl", correct:true, labels:["ベンゼン", "塩素", "クロロベンゼン"], answer:"鉄触媒による置換" },
-    { type:"クメン法", eq:"C₆H₅CH(CH₃)₂ + O₂ → C₆H₅OH + CH₃COCH₃", correct:true, labels:["クメン", "酸素", "フェノール", "アセトン"], answer:"クメン法" },
-    { type:"中和", eq:"C₆H₅OH + NaOH → C₆H₅ONa + H₂O", correct:true, labels:["フェノール", "水酸化Na", "Naフェノキシド"], answer:"フェノールの塩" },
-    { type:"銀鏡反応", eq:"R-CHO + 2[Ag(NH₃)₂]⁺ + 2OH⁻ → R-COOH + 2Ag + 4NH₃ + H₂O", correct:true, answer:"銀鏡反応" },
-    { type:"オストワルト法", eq:"4NH₃ + 5O₂ → 4NO + 6H₂O", correct:true, answer:"アンモニアの酸化" }
+    { type:"置換反応", eq:"C6H6 + HNO3 → C6H5NO2 + H2O", correct:true, labels:["ベンゼン", "硝酸", "ニトロベンゼン"], answer:"ニトロ化" },
+    { type:"置換反応", eq:"C6H6 + H2SO4 → C6H5SO3H + H2O", correct:true, labels:["ベンゼン", "硫酸", "ベンゼンスルホン酸"], answer:"スルホン化" },
+    { type:"付加反応", eq:"C6H6 + 3H2 → C6H12", correct:true, labels:["ベンゼン", "水素", "シクロヘキサン"], answer:"水素付加" }
 ];
 
-let mode = ""; let fullPool = []; let currentPool = []; let currentQ; 
-let score = 0; let startTime; let gameActive = false;
+let mode = ""; let currentPool = []; let score = 0; let startTime; let gameActive = false;
+
+function formatEq(eq) {
+    return eq.replace(/([A-Za-z)])(\d+)/g, '$1<sub>$2</sub>');
+}
 
 function selectMode(m) {
     mode = m;
-    fullPool = m === 'basic' ? [...basicQuestions] : m === 'advanced' ? [...advancedQuestions] : [...basicQuestions, ...advancedQuestions];
     document.getElementById("selectedModeText").innerText = "モード: " + (m==='basic'?'化学基礎':m==='advanced'?'化学':'全部');
     document.getElementById("startGameBtn").style.display = "inline-block";
-}
-
-function getSmartPool(raw) {
-    let result = []; let tempRaw = [...raw];
-    for(let i=0; i<10; i++) {
-        let attempts = 0;
-        while(attempts < 50) {
-            let idx = Math.floor(Math.random() * tempRaw.length);
-            let candidate = tempRaw[idx] || raw[Math.floor(Math.random()*raw.length)];
-            if(result.length >= 2 && candidate.correct === result[result.length-1].correct && candidate.correct === result[result.length-2].correct) {
-                attempts++; continue;
-            }
-            result.push(candidate);
-            if(tempRaw[idx]) tempRaw.splice(idx, 1);
-            break;
-        }
-    }
-    return result;
 }
 
 function countdownStart() {
@@ -167,41 +143,34 @@ function countdownStart() {
 
 function start() {
     score = 0; gameActive = true;
-    currentPool = getSmartPool(fullPool);
+    let pool = mode === 'basic' ? basicQuestions : mode === 'advanced' ? advancedQuestions : [...basicQuestions, ...advancedQuestions];
+    currentPool = [];
+    for(let i=0; i<10; i++) currentPool.push(pool[Math.floor(Math.random() * pool.length)]);
+    
     document.getElementById("menuScreen").classList.remove("active");
     document.getElementById("gameScreen").classList.add("active");
-    document.getElementById("btnContainer").style.display = "flex";
-    document.getElementById("resultArea").innerHTML = "";
     startTime = Date.now(); next();
 }
 
 function next() {
     if(score >= 10) { win(); return; }
-    currentQ = currentPool[score];
-    document.getElementById("progress").innerText = `${score} / 10`;
-    document.getElementById("reactionType").innerText = currentQ.type;
-    document.getElementById("equation").innerText = currentQ.eq;
+    let q = currentPool[score];
+    document.getElementById("progress").innerText = `${score + 1} / 10`;
+    document.getElementById("reactionType").innerText = q.type;
+    document.getElementById("equation").innerHTML = formatEq(q.eq);
     const labelContainer = document.getElementById("labels");
     labelContainer.innerHTML = "";
-    if (currentQ.labels) {
-        currentQ.labels.forEach(name => {
-            const span = document.createElement("span");
-            span.className = "label-item";
-            span.innerText = name;
-            labelContainer.appendChild(span);
-        });
-    }
+    if (q.labels) q.labels.forEach(l => { const s=document.createElement("span"); s.className="label-item"; s.innerText=l; labelContainer.appendChild(s); });
 }
 
 function judge(choice) {
     if(!gameActive) return;
-    if(choice === currentQ.correct) { score++; next(); } 
-    else { fail(); }
+    if(choice === currentPool[score].correct) { score++; next(); } else { fail(); }
 }
 
 function fail() {
-    gameActive = false; document.getElementById("btnContainer").style.display = "none";
-    document.getElementById("resultArea").innerHTML = `<div class="fail">MISS!</div><div class="correctAnswer">${currentQ.answer}</div><br><button class="smallBtn" onclick="backToMenu()">戻る</button>`;
+    gameActive = false;
+    document.getElementById("resultArea").innerHTML = `<div class="fail">MISS!</div><div class="correctAnswer">${formatEq(currentPool[score].answer)}</div><br><button class="smallBtn" onclick="backToMenu()">戻る</button>`;
 }
 
 function win() {
@@ -214,29 +183,22 @@ function win() {
 
 function registerRanking() {
     const name = document.getElementById("username").value || "匿名";
-    const key = "chem_rank_" + mode;
-    let ranks = JSON.parse(localStorage.getItem(key) || "[]");
+    const ranks = JSON.parse(localStorage.getItem("chem_rank_" + mode) || "[]");
     ranks.push({name, time: parseFloat(window.lastTime)});
     ranks.sort((a,b) => a.time - b.time);
-    localStorage.setItem(key, JSON.stringify(ranks.slice(0, 3)));
+    localStorage.setItem("chem_rank_" + mode, JSON.stringify(ranks.slice(0, 3)));
     backToMenu();
-}
-
-function updateRankDisplay() {
-    ['basic', 'advanced', 'all'].forEach(m => {
-        const ranks = JSON.parse(localStorage.getItem("chem_rank_" + m) || "[]");
-        document.getElementById(m + "Ranking").innerHTML = ranks.map((r, i) => `<div class="rankItem"><span>${i+1}. ${r.name}</span><span>${r.time}s</span></div>`).join('') || "記録なし";
-    });
 }
 
 function backToMenu() {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById("menuScreen").classList.add("active");
     document.getElementById("countdown").innerText = "";
-    updateRankDisplay();
+    ['basic', 'advanced', 'all'].forEach(m => {
+        const ranks = JSON.parse(localStorage.getItem("chem_rank_" + m) || "[]");
+        document.getElementById(m + "Ranking").innerHTML = ranks.map((r, i) => `<div class="rankItem"><span>${i+1}. ${r.name}</span><span>${r.time}s</span></div>`).join('') || "記録なし";
+    });
 }
-
-updateRankDisplay();
 </script>
 </body>
 </html>
